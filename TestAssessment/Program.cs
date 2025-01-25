@@ -10,19 +10,19 @@ var configuration = new ConfigurationBuilder()
 var dbConnection = new DatabaseConnection(configuration);
 
 using var connection = dbConnection.CreateConnection();
-var locationRepository = new LocationRepository(connection);
+var fareRepository = new FareRepository(connection);
 
-var newLocation = new Location
+var newFare = new Fare
 {
-    PULocationID = 1,
-    DOLocationID = 2,
+    FareAmount = 25.50m,
+    TipAmount = 5.00m,
     TripId = 1
 };
-locationRepository.InsertLocation(newLocation);
-Console.WriteLine("Location inserted successfully.");
+fareRepository.InsertFare(newFare);
+Console.WriteLine("Fare inserted successfully.");
 
-var locations = locationRepository.GetLocations();
-foreach (var location in locations)
+var fares = fareRepository.GetFares();
+foreach (var fare in fares)
 {
-    Console.WriteLine($"Location ID: {location.LocationId}, PU: {location.PULocationID}, DO: {location.DOLocationID}");
+    Console.WriteLine($"Fare ID: {fare.FareId}, Amount: {fare.FareAmount}, Tip: {fare.TipAmount}");
 }
