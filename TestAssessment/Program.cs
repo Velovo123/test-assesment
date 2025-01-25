@@ -2,6 +2,7 @@
 using TestAssessment.DataAccess;
 using TestAssessment.Models;
 using TestAssessment.Repository;
+using TestAssessment.Services;
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
@@ -10,19 +11,28 @@ var configuration = new ConfigurationBuilder()
 var dbConnection = new DatabaseConnection(configuration);
 
 using var connection = dbConnection.CreateConnection();
-var processedTripRepository = new ProcessedTripRepository(connection);
 
-var newProcessedTrip = new ProcessedTrip
-{
-    TripId = 1,
-    IsDuplicate = false,
-    UTCConversionDatetime = DateTime.UtcNow
-};
-processedTripRepository.InsertProcessedTrip(newProcessedTrip);
-Console.WriteLine("ProcessedTrip inserted successfully.");
+var tripRepository = new TripRepository(connection);
+var locationRepository = new LocationRepository(connection);
+var fareRepository = new FareRepository(connection);
 
-var processedTrips = processedTripRepository.GetProcessedTrips();
-foreach (var processedTrip in processedTrips)
+var csvProcessor = new CsvProcessor();
+
+var filePath = "sample-cab-data.csv"; 
+var data = csvProcessor.ReadDataFromCsv(filePath);
+
+foreach (var (trip, location, fare) in data)
 {
-    Console.WriteLine($"ProcessedTrip ID: {processedTrip.ProcessedTripId}, IsDuplicate: {processedTrip.IsDuplicate}");
+    // Insert Trip and get TripId
+    var tripId = tripRepository.InsertTrip(trip);
+
+    // Associate TripId with Location and insert
+    location.TripId = tripId;
+    locationRepository.InsertLocation(location);
+
+    // Associate TripId with Fare and insert
+    fare.TripId = tripId;
+    fareRepository.InsertFare(fare);
 }
+
+Console.WriteLine("Data processed and inserted successfully.");
