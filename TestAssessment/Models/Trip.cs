@@ -14,5 +14,14 @@ namespace TestAssessment.Models
         public int PassengerCount { get; set; }
         public double TripDistance { get; set; }
         public string StoreAndFwdFlag { get; set; }
+
+        public Trip(DateTime pickupDatetime, DateTime dropoffDatetime, int passengerCount, double tripDistance, string storeAndFwdFlag)
+        {
+            PickupDatetime = pickupDatetime;
+            DropoffDatetime = dropoffDatetime;
+            PassengerCount = passengerCount;
+            TripDistance = tripDistance;
+            StoreAndFwdFlag = storeAndFwdFlag;
+        }
     }
 }
