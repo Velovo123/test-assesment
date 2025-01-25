@@ -10,19 +10,19 @@ var configuration = new ConfigurationBuilder()
 var dbConnection = new DatabaseConnection(configuration);
 
 using var connection = dbConnection.CreateConnection();
-var fareRepository = new FareRepository(connection);
+var processedTripRepository = new ProcessedTripRepository(connection);
 
-var newFare = new Fare
+var newProcessedTrip = new ProcessedTrip
 {
-    FareAmount = 25.50m,
-    TipAmount = 5.00m,
-    TripId = 1
+    TripId = 1,
+    IsDuplicate = false,
+    UTCConversionDatetime = DateTime.UtcNow
 };
-fareRepository.InsertFare(newFare);
-Console.WriteLine("Fare inserted successfully.");
+processedTripRepository.InsertProcessedTrip(newProcessedTrip);
+Console.WriteLine("ProcessedTrip inserted successfully.");
 
-var fares = fareRepository.GetFares();
-foreach (var fare in fares)
+var processedTrips = processedTripRepository.GetProcessedTrips();
+foreach (var processedTrip in processedTrips)
 {
-    Console.WriteLine($"Fare ID: {fare.FareId}, Amount: {fare.FareAmount}, Tip: {fare.TipAmount}");
+    Console.WriteLine($"ProcessedTrip ID: {processedTrip.ProcessedTripId}, IsDuplicate: {processedTrip.IsDuplicate}");
 }
