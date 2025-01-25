@@ -23,5 +23,10 @@ namespace TestAssessment.Models
             TripDistance = tripDistance;
             StoreAndFwdFlag = storeAndFwdFlag;
         }
+
+        public Trip()
+        {
+            StoreAndFwdFlag = string.Empty;
+        }
     }
 }
