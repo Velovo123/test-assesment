@@ -10,16 +10,19 @@ var configuration = new ConfigurationBuilder()
 var dbConnection = new DatabaseConnection(configuration);
 
 using var connection = dbConnection.CreateConnection();
-var tripRepository = new TripRepository(connection);
+var locationRepository = new LocationRepository(connection);
 
-var newTrip = new Trip(DateTime.Now, DateTime.Now.AddHours(1), 3, 12.5, "N");
-tripRepository.InsertTrip(newTrip);
-Console.WriteLine("Trip inserted successfully.");
-
-
-var trips = tripRepository.GetTrips();
-foreach (var trip in trips)
+var newLocation = new Location
 {
-    Console.WriteLine($"Trip ID: {trip.TripId}, Distance: {trip.TripDistance}");
-}
+    PULocationID = 1,
+    DOLocationID = 2,
+    TripId = 1
+};
+locationRepository.InsertLocation(newLocation);
+Console.WriteLine("Location inserted successfully.");
 
+var locations = locationRepository.GetLocations();
+foreach (var location in locations)
+{
+    Console.WriteLine($"Location ID: {location.LocationId}, PU: {location.PULocationID}, DO: {location.DOLocationID}");
+}
