@@ -18,13 +18,14 @@ namespace TestAssessment.Repository
             _dbConnection = dbConnection;
         }
 
-        public void InsertTrip(Trip trip)
+        public int InsertTrip(Trip trip)
         {
             var query = @"
                 INSERT INTO Trip (PickupDatetime, DropoffDatetime, PassengerCount, TripDistance, StoreAndFwdFlag)
-                VALUES (@PickupDatetime, @DropoffDatetime, @PassengerCount, @TripDistance, @StoreAndFwdFlag)";
+                VALUES (@PickupDatetime, @DropoffDatetime, @PassengerCount, @TripDistance, @StoreAndFwdFlag);
+                SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
-            _dbConnection.Execute(query, trip);
+            return _dbConnection.QuerySingle<int>(query, trip);
         }
 
         public IEnumerable<Trip> GetTrips()
