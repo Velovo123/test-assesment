@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace TestAssessment.Models
 {
-    public class Location
+    public class PULocationIDWithHighestTip
     {
-        public int LocationId { get; set; }
         public int PULocationID { get; set; }
-        public int DOLocationID { get; set; }
-        public int TripId { get; set; }
+        public decimal AverageTip { get; set; }
     }
 }

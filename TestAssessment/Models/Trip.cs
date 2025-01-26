@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TestAssessment.Models
 {
@@ -13,15 +9,17 @@ namespace TestAssessment.Models
         public DateTime DropoffDatetime { get; set; }
         public int PassengerCount { get; set; }
         public double TripDistance { get; set; }
-        public string StoreAndFwdFlag { get; set; }
+        public string StoreAndFwdFlag { get; set; } 
 
-        public Trip(DateTime pickupDatetime, DateTime dropoffDatetime, int passengerCount, double tripDistance, string storeAndFwdFlag)
+        public int PULocationID { get; set; } 
+        public int DOLocationID { get; set; } 
+
+        public decimal FareAmount { get; set; }
+        public decimal TipAmount { get; set; }
+
+        public Trip()
         {
-            PickupDatetime = pickupDatetime;
-            DropoffDatetime = dropoffDatetime;
-            PassengerCount = passengerCount;
-            TripDistance = tripDistance;
-            StoreAndFwdFlag = storeAndFwdFlag;
+            StoreAndFwdFlag = string.Empty;
         }
     }
 }
