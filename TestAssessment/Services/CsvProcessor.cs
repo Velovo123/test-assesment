@@ -5,12 +5,13 @@ using System.IO;
 using CsvHelper;
 using CsvHelper.Configuration;
 using TestAssessment.Models;
+using TestAssessment.Services.IServices;
 
 namespace TestAssessment.Services
 {
-    public class CsvProcessor
+    public class CsvProcessor : ICsvProcessor
     {
-        public List<(Trip Trip, Location Location, Fare Fare)> ReadDataFromCsv(string filePath)
+        public List<Trip> ReadDataFromCsv(string filePath)
         {
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -21,7 +22,7 @@ namespace TestAssessment.Services
             using var reader = new StreamReader(filePath);
             using var csv = new CsvReader(reader, config);
 
-            var data = new List<(Trip Trip, Location Location, Fare Fare)>();
+            var unifiedTrips = new List<Trip>();
 
             csv.Read();
             csv.ReadHeader();
@@ -36,35 +37,26 @@ namespace TestAssessment.Services
                     throw new InvalidOperationException("Missing datetime fields in the CSV file.");
                 }
 
-                var trip = new Trip
+                var unifiedTrip = new Trip
                 {
-                    PickupDatetime = DateTime.ParseExact(
+                    PickupDatetime = ConvertToUtc(
                         pickupDatetimeField.Trim(),
-                        "MM/dd/yyyy hh:mm:ss tt",
-                        CultureInfo.InvariantCulture
+                        "MM/dd/yyyy hh:mm:ss tt"
                     ),
-                    DropoffDatetime = DateTime.ParseExact(
+                    DropoffDatetime = ConvertToUtc(
                         dropoffDatetimeField.Trim(),
-                        "MM/dd/yyyy hh:mm:ss tt",
-                        CultureInfo.InvariantCulture
+                        "MM/dd/yyyy hh:mm:ss tt"
                     ),
                     PassengerCount = int.TryParse(csv.GetField("passenger_count")?.Trim(), out var passengerCount) ? passengerCount : 0,
                     TripDistance = double.TryParse(csv.GetField("trip_distance")?.Trim(),
                         NumberStyles.Any, CultureInfo.InvariantCulture, out var tripDistance)
                         ? tripDistance
                         : 0.0,
-                    StoreAndFwdFlag = csv.GetField("store_and_fwd_flag")?.Trim() ?? "N"
-                };
+                    StoreAndFwdFlag = NormalizeStoreAndFwdFlag(csv.GetField("store_and_fwd_flag")?.Trim()),
 
-                var location = new Location
-                {
                     PULocationID = int.TryParse(csv.GetField("PULocationID")?.Trim(), out var puLocationId) ? puLocationId : 0,
                     DOLocationID = int.TryParse(csv.GetField("DOLocationID")?.Trim(), out var doLocationId) ? doLocationId : 0,
-                    TripId = 0 // Will be set later
-                };
 
-                var fare = new Fare
-                {
                     FareAmount = decimal.TryParse(csv.GetField("fare_amount")?.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture,
                         out var fareAmount)
                         ? fareAmount
@@ -72,14 +64,33 @@ namespace TestAssessment.Services
                     TipAmount = decimal.TryParse(csv.GetField("tip_amount")?.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture,
                         out var tipAmount)
                         ? tipAmount
-                        : 0.0m,
-                    TripId = 0 // Will be set later
+                        : 0.0m
                 };
 
-                data.Add((trip, location, fare));
+                unifiedTrips.Add(unifiedTrip);
             }
 
-            return data;
+            return unifiedTrips;
+        }
+
+        private static DateTime ConvertToUtc(string dateTimeString, string format)
+        {
+            var estZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+
+            var localTime = DateTime.ParseExact(dateTimeString, format, CultureInfo.InvariantCulture);
+
+            return TimeZoneInfo.ConvertTimeToUtc(localTime, estZone);
+        }
+
+        private static string NormalizeStoreAndFwdFlag(string? flag)
+        {
+            if (string.IsNullOrWhiteSpace(flag)) return "No";
+            return flag.ToUpper() switch
+            {
+                "Y" => "Yes",
+                "N" => "No",
+                _ => flag
+            };
         }
     }
 }
